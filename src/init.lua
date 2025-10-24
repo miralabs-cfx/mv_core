@@ -1,5 +1,5 @@
-local MV_CORE <const> = "mv_core"
 local cache <const> = {}
+local MV_CORE <const> = "mv_core"
 local decode <const> = json.decode
 local LoadResourceFile <const> = LoadResourceFile
 
@@ -15,21 +15,22 @@ local LoadResourceFile <const> = LoadResourceFile
 local function init(path, isJsonFile)
     path = path:gsub('%.', '/')
     local filePath <const> = isJsonFile and ("%s.json"):format(path) or ("%s.lua"):format(path)
-
     if cache[filePath] then
         return cache[filePath]
     end
+
     local fileContent <const> = LoadResourceFile(MV_CORE, filePath)
     if not fileContent then
         error("^1Error loading file file : "..path.."^0", 2)
     end
+
     if isJsonFile then
         local data <const> = decode(fileContent)
         if not data then
             error("^1Error decoding json file : "..path.."^0", 2)
         end
 
-        cache[filePath] = data or true
+        cache[filePath] = data
         return data
     end
 

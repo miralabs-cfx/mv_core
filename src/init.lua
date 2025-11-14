@@ -7,6 +7,7 @@ local LoadResourceFile <const> = LoadResourceFile
     Todo in this file:
     - init debugger mode with mv.mode on 'dev'
     - init locale system
+    - init config system
 --]]
 
 ---@param path string
@@ -14,20 +15,20 @@ local LoadResourceFile <const> = LoadResourceFile
 ---@return unknown
 local function init(path, isJsonFile)
     path = path:gsub('%.', '/')
-    local filePath <const> = isJsonFile and ("%s.json"):format(path) or ("%s.lua"):format(path)
+    local filePath <const> = isJsonFile and path .. ".json" or path .. ".lua"
     if cache[filePath] then
         return cache[filePath]
     end
 
     local fileContent <const> = LoadResourceFile(MV_CORE, filePath)
     if not fileContent then
-        error("^1Error loading file file : "..path.."^0", 2)
+        error("^1Error loading file file : " .. path .. "^0", 2)
     end
 
     if isJsonFile then
         local data <const> = decode(fileContent)
         if not data then
-            error("^1Error decoding json file : "..path.."^0", 2)
+            error("^1Error decoding json file : " .. path .. "^0", 2)
         end
 
         cache[filePath] = data
@@ -36,7 +37,7 @@ local function init(path, isJsonFile)
 
     local fn <const>, err <const> = load(fileContent)
     if not fn or err then
-        error("^1Error loading module : "..path.."^0", 2)
+        error("^1Error loading module : " .. path .. "^0", 2)
     end
 
     local module <const> = fn()
@@ -57,10 +58,20 @@ local mv <const> = setmetatable({
     ---@todo Maybe useful to add exports auto register on mv.__index is function ?
 })
 
+local config <const> = setmetatable({
+    alias = init('config.alias.' .. mv.service),
+}, {
+    __index = OnCallConfig,
+    __call = OnCallConfig,
+})
 _ENV.mv = mv
+-- _ENV.config = config // todo implement config system
 
+init 'imports.print.shared'
 init 'imports.require.shared'
 
-require.alias {
-    { "class-builder", "imports.class.shared" },
-}
+require.alias(config.alias)
+
+if mv.mode == 'dev' then
+    ---@todo implement debugger mode with mv.mode on 'dev'
+end

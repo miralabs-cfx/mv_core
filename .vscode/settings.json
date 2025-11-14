@@ -1,0 +1,9 @@
+{
+    "Lua.diagnostics.disable": [
+        "malformed-number",
+        "unbalanced-assignments",
+        "missing-parameter",
+        "return-type-mismatch",
+        "missing-return-value"
+    ]
+}
